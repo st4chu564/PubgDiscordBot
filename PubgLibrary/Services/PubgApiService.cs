@@ -1,22 +1,21 @@
 ﻿using Discord;
-using DiscordBot.Helpers;
-using DiscordBot.Models.Pubg;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using DiscordBotShared.Helpers;
+using PubgLibrary.Implementations;
+using PubgLibrary.Models;
 using System.Net.Http.Headers;
 using System.Reflection;
+using DiscordBotShared.Interfaces;
 using System.Text.RegularExpressions;
 
-namespace DiscordBot.Services
+namespace PubgLibrary.Services
 {
     public class PubgApiService : IPubgApiService
     {
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _config;
-        private readonly Urls _urls;
-
-        #region URLs
-
-        #endregion
+        private readonly Urls _urls = new Urls();
 
         #region Other consts
 
@@ -29,11 +28,13 @@ namespace DiscordBot.Services
         /// Constructor for Pubg Api Service
         /// </summary>
         /// <param name="config"></param>
-        public PubgApiService(IConfiguration config)
+        public PubgApiService(IConfiguration config, IUrls urls)
         {
             _config = config;
+            _urls = (Urls)urls;
+            _urls.Initialize(config);
             _httpClient = new HttpClient();
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _config.GetValue<string>("PubgApiKey"));
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _config["PubgApiKey"]);
             _httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.api+json");
         }
 
@@ -166,11 +167,15 @@ namespace DiscordBot.Services
             builder.AddField(field =>
             {
                 field.Name = "Link: ";
-                field.Value = $"[Pubg lookup]({GetPubgLookupFormat(playerData.Player.Attributes.Name, latestMatch.Match.Id)}), [Chicken Dinner]({GetChickenDinnerMatchAddress(latestMatch.Assets.FirstOrDefault().GetAssetUrl(), playerData.Player.Attributes.Name)})";
+                field.Value = $"[Pubg lookup]({GetPubgLookupFormat(playerData.Player.Attributes.Name, latestMatch.Match.Id, _urls.PubgLookupUrl)}), [Chicken Dinner]({GetChickenDinnerMatchAddress(latestMatch.Assets.FirstOrDefault().GetAssetUrl(), playerData.Player.Attributes.Name, _urls.ChickenDinnerUrl)})";
                 field.IsInline = false;
             });
 
+            builder.Footer = new EmbedFooterBuilder();
+
             builder.Footer.Text = "Made by St4chu";
+
+            builder.Footer.Build();
 
             return builder.Build();
         }
@@ -184,7 +189,7 @@ namespace DiscordBot.Services
         {
             try
             {
-                var response = await _httpClient.GetAsync($"{PubgApiUrl}/{PubgDefaultPlatform}/{PubgMatchesUrl}/{matchId}");
+                var response = await _httpClient.GetAsync($"{_urls.PubgApiUrl}/{PubgDefaultPlatform}/{_urls.PubgMatchesUrl}/{matchId}");
 
                 var text = await response.Content.ReadAsStringAsync();
 
@@ -232,18 +237,16 @@ namespace DiscordBot.Services
 
             var requestResponse = await _httpClient.GetAsync($"{_urls.PubgApiUrl}/{PubgDefaultPlatform}/{_urls.PubgPlayerIdUrl}/{playerApiId}");
 
-            var test = await requestResponse.Content.ReadAsStringAsync();
-
-            return JsonConvert.DeserializeObject<PlayerResponseModel>(test);
+            return JsonConvert.DeserializeObject<PlayerResponseModel>(await requestResponse.Content.ReadAsStringAsync());
         }
 
         private bool IsPlayerIdFormat(string playerId)
         {
-            throw new NotImplementedException();
+            return Regex.IsMatch(playerId, PubgAccountIdFormat);
         }
 
-        private static string GetChickenDinnerMatchAddress(string telemetryFileName, string playerToFollow) => $"{ChickenDinnerUrl}/{PubgDefaultPlatform}/{telemetryFileName}?follow={playerToFollow}";
+        private static string GetChickenDinnerMatchAddress(string telemetryFileName, string playerToFollow, string chickenDinnerUrl) => $"{chickenDinnerUrl}/{PubgDefaultPlatform}/{telemetryFileName}?follow={playerToFollow}";
 
-        private static string GetPubgLookupFormat(string playerName, string matchId) => $"{_urls.PubgLookupUrl}/{PubgDefaultPlatform}/{playerName}/matches/{matchId}";
+        private static string GetPubgLookupFormat(string playerName, string matchId, string pubgLookupUrl) => $"{pubgLookupUrl}/{PubgDefaultPlatform}/{playerName}/matches/{matchId}";
     }
 }

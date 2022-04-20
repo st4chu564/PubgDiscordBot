@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace DiscordBot.Models.Pubg
+namespace PubgLibrary.Models
 {
     public class MatchParticipantModel
     {
@@ -16,7 +16,6 @@ namespace DiscordBot.Models.Pubg
 
     public class MatchParticipantStatsModel
     {
-
         [JsonProperty("DBNOs")]
         public int Dbnos { get; set; } = 0;
 
@@ -43,6 +42,7 @@ namespace DiscordBot.Models.Pubg
 
         [JsonProperty("kills")]
         public int Kills { get; set; } = 0;
+
         [JsonProperty("longestKills")]
         public float LongestKill { get; set; } = 0;
 

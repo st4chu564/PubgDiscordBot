@@ -1,6 +1,7 @@
 ﻿using Discord;
+using DiscordBotShared.Interfaces;
 
-namespace DiscordBot.Services
+namespace PubgLibrary.Services
 {
     public interface IPubgApiService
     {

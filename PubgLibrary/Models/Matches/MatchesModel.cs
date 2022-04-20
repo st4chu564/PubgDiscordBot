@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
+using PubgLibrary.Models;
 
-namespace DiscordBot.Models.Pubg
+namespace PubgLibrary.Models
 {
     public class Matches
     {

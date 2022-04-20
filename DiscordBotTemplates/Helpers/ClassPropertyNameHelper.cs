@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace DiscordBot.Helpers
+namespace DiscordBotShared.Helpers
 {
     public static class ClassPropertyNameHelper<T> where T : class
     {

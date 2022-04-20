@@ -1,4 +1,4 @@
-﻿namespace DiscordBot.Helpers
+﻿namespace DiscordBotShared.Helpers
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public class TranslationAttribute : Attribute

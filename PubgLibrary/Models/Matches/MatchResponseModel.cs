@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace DiscordBot.Models.Pubg
+namespace PubgLibrary.Models
 {
     public class MatchResponseModel
     {

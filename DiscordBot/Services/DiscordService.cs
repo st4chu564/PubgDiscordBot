@@ -8,7 +8,7 @@ namespace DiscordBot.Services
 {
     public class DiscordService : IDiscordService
     {
-        private DiscordSocketClient _client;
+        private readonly DiscordSocketClient _client;
         private readonly IConfiguration _config;
         private readonly IServiceProvider _serviceProvider;
 

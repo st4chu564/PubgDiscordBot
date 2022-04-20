@@ -1,7 +1,6 @@
 ﻿using Discord.Commands;
 using Discord.WebSocket;
 using DiscordBot.Commands;
-using System.Reflection;
 
 namespace DiscordBot.Handlers
 {
@@ -22,7 +21,16 @@ namespace DiscordBot.Handlers
             _client.MessageReceived += HandleCommandAsync;
             _services = services;
 
-            await _commands.AddModuleAsync<PubgCommandsModule>(services);
+            var type = typeof(ICommandsModule);
+            var assemblies = AppDomain.CurrentDomain
+                .GetAssemblies()
+                .SelectMany(a => a.GetTypes())
+                .Where(a => a.IsClass && a.Name.Contains("CommandsModule") && !type.IsAssignableFrom(a));
+
+            foreach(var assembly in assemblies)
+            {
+                await _commands.AddModuleAsync(assembly, _services);
+            }
         }
 
         private async Task HandleCommandAsync(SocketMessage messageParam)
